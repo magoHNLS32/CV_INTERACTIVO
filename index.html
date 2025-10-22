@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>CV PDF</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #f0f0f0;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .formulario {
+      max-width: 800px;
+      background: white;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .formulario input, .formulario textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .formulario button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #cv-preview {
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      margin-top: 20px;
+    }
+
+    .cv {
+      width: 210mm;
+      height: 297mm;
+      background: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    .header {
+      display: flex;
+      background-color: #3498db;
+      color: white;
+      padding: 20px;
+      align-items: center;
+    }
+
+    .header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 20px;
+      border: 2px solid white;
+    }
+
+    .header-info h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .header-info h3 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    .contenido {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .columna {
+      flex: 1;
+    }
+
+    .seccion {
+      margin-bottom: 15px;
+    }
+
+    .seccion h2 {
+      font-size: 14px;
+      color: #3498db;
+      margin-bottom: 4px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .seccion p {
+      font-size: 12px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+
+<div class="formulario">
+  <label>Nombre:</label><input type="text" id="nombre">
+  <label>Profesión:</label><input type="text" id="profesion">
+  <label>Descripción Profesional:</label><textarea id="descripcion"></textarea>
+  <label>Experiencia Laboral:</label><textarea id="experiencia"></textarea>
+  <label>Educación:</label><textarea id="educacion"></textarea>
+  <label>Habilidades:</label><textarea id="habilidades"></textarea>
+  <label>Datos de Contacto (correo, teléfono, redes, etc):</label><textarea id="contacto"></textarea>
+  <label>Foto:</label><input type="file" id="foto" accept="image/*">
+  <button onclick="generarCV()">Generar CV</button>
+  <button onclick="descargarPDF()">Descargar PDF</button>
+</div>
+
+<div id="cv-preview">
+  <div class="cv" id="cv"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function generarCV() {
+  const nombre = document.getElementById("nombre").value;
+  const profesion = document.getElementById("profesion").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const experiencia = document.getElementById("experiencia").value;
+  const educacion = document.getElementById("educacion").value;
+  const habilidades = document.getElementById("habilidades").value;
+  const contacto = document.getElementById("contacto").value;
+  const fotoInput = document.getElementById("foto");
+
+  const infoHTML = `
+    <div class="header-info">
+      <h1>${nombre}</h1>
+      <h3>${profesion}</h3>
+    </div>
+  `;
+
+  const contenidoHTML = `
+    <div class="contenido">
+      <div class="columna">
+        <div class="seccion"><h2>Descripción Profesional</h2><p>${descripcion}</p></div>
+        <div class="seccion"><h2>Experiencia Laboral</h2><p>${experiencia}</p></div>
+      </div>
+      <div class="columna">
+        <div class="seccion"><h2>Educación</h2><p>${educacion}</p></div>
+        <div class="seccion"><h2>Habilidades</h2><p>${habilidades}</p></div>
+        <div class="seccion"><h2>Datos de Contacto</h2><p>${contacto}</p></div>
+      </div>
+    </div>
+  `;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const fotoHTML = `<img src="${e.target.result}" alt="Foto">`;
+    document.getElementById("cv").innerHTML = `
+      <div class="header">${fotoHTML}${infoHTML}</div>${contenidoHTML}`;
+  };
+
+  if (fotoInput.files.length > 0) {
+    reader.readAsDataURL(fotoInput.files[0]);
+  } else {
+    const fotoHTML = `<div style="width:100px;height:100px;background:#ccc;border-radius:50%;"></div>`;
+    document.getElementById("cv").innerHTML = `
+      <div class="header">${fotoHTML}${infoHTML}</div>${contenidoHTML}`;
+  }
+}
+
+function descargarPDF() {
+  const element = document.getElementById("cv");
+  const opt = {
+    margin:       0,
+    filename:     'cv_profesional.pdf',
+    image:        { type: 'jpeg', quality: 1 },
+    html2canvas:  { scale: 4, scrollY: 0 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+}
+</script>
+
+</body>
+</html>
